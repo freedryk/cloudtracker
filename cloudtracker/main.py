@@ -28,9 +28,9 @@ def load_data(filename):
     core = input_file.variables['core'][:].astype(bool)
     condensed = input_file.variables['condensed'][:].astype(bool)
     plume = input_file.variables['plume'][:].astype(bool)
-    u = input_file.variables['u'][:]
-    v = input_file.variables['v'][:]
-    w = input_file.variables['w'][:]
+    u = input_file.variables['u'][:].astype(double)
+    v = input_file.variables['v'][:].astype(double)
+    w = input_file.variables['w'][:].astype(double)
         
     input_file.close()
 
