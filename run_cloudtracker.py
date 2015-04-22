@@ -8,7 +8,6 @@ from multiprocessing import Pool
 PROC = 1
 
 import model_param as mc
-from conversion import convert
 import cloudtracker.main
 
 # Default working directory for ent_analysis package

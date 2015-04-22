@@ -2,10 +2,8 @@
 
 import numpy
 import glob
-import cPickle
-import sys
-import os
-import os.path
+import sys, os, gc
+import h5py
 
 from generate_cloudlets import generate_cloudlets
 from cluster_cloudlets import cluster_cloudlets
@@ -13,12 +11,12 @@ from make_graph import make_graph
 from output_cloud_data import output_cloud_data
 
 try:
-   from netCDF4 import Dataset
+	from netCDF4 import Dataset
 except:
-   try:
-       from netCDF3 import Dataset
-   except:
-       from pupynere import netcdf_file as Dataset
+	try:
+		from netCDF3 import Dataset
+	except:
+		from pupynere import netcdf_file as Dataset
 
 #-------------------
 
@@ -38,38 +36,50 @@ def load_data(filename):
 
 #---------------
 
+@profile
 def main(MC, save_all=True):
-    sys.setrecursionlimit(100000)
     input_dir = MC['input_directory']
     nx = MC['nx']
     ny = MC['ny']
     nz = MC['nz']
     nt = MC['nt']
-    
+
+    items = ['core', 'condensed', 'plume', 'u_condensed', 'v_condensed', \
+        'w_condensed', 'u_plume', 'v_plume', 'w_plume']
+
     filelist = glob.glob('%s/*' % input_dir)
     filelist.sort()
     
     if (len(filelist) != nt):
-        raise "Only %d files found, nt=%d files expected" % (len(filelist), nt)
+        raise Exception("Only %d files found, nt=%d files expected" % (len(filelist), nt))
 
     if not os.path.exists('pkl'):
         os.mkdir('pkl')
     if not os.path.exists('output'):
         os.mkdir('output')
+    # TEST: Data folder for testing
+    if not os.path.exists('hdf5'):
+        os.mkdir('hdf5')
 
+    # TODO: Parallelize file access (multiprocessing) 
     for n, filename in enumerate(filelist):
         print "generate cloudlets; time step: %d" % n
         core, condensed, plume, u, v, w = load_data(filename)
 
-        cloudlets = generate_cloudlets(core, condensed, plume, 
-                                       u, v, w, MC)
-    
-        cPickle.dump(cloudlets, open('pkl/cloudlets_%08g.pkl' % n,'wb'))
+        cloudlets = generate_cloudlets(core, condensed, plume, u, v, w, MC)
+        
+        with h5py.File('hdf5/cloudlets_%08g.h5' % n, "w") as f:
+            for i in range(len(cloudlets)):
+                grp = f.create_group(str(i))
+                for var in items:
+                    dset = grp.create_dataset(var, data=cloudlets[i][var])
+        gc.collect() # NOTE: Force garbage-collection at the end of loop
 
 #----cluster----
+    print "Making clusters"
 
     cluster_cloudlets(MC)
-        
+
 #----graph----
 
     print "make graph"
@@ -79,11 +89,19 @@ def main(MC, save_all=True):
     print "\tFound %d clouds" % len(cloud_graphs)
 
     if save_all:
-        cPickle.dump((cloud_graphs, cloud_noise), open('pkl/graph_data.pkl', 'wb'))
+        # FIXME: Object dtype dtype('object') has no native HDF5 equivalent
+        # with h5py.File('hdf5/graph_data.h5', 'w') as f:
+        #     dset = f.create_dataset('cloud_graphs', data=cloud_graphs)
+        #     dset = f.create_dataset('cloud_noise', data=cloud_noise)
+        # #cPickle.dump((cloud_graphs, cloud_noise), open('pkl/graph_data.pkl', 'wb'))
+        pass
             
 #----output----
 
+    # TODO: Parallelize file output (multiprocessing)
     for n in range(nt):
         print "output cloud data, time step: %d" % n
+
         output_cloud_data(cloud_graphs, cloud_noise, n, MC)
+        gc.collect()
             

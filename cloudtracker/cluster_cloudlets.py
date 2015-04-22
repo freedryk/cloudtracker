@@ -2,7 +2,8 @@
 # Runtime (690, 130, 128, 128): 1.5 hours
 
 import numpy
-import cPickle
+import h5py
+import gc
 
 from cloud_objects import Cloudlet, Cluster
 from utility_functions import index_to_zyx, zyx_to_index
@@ -317,34 +318,47 @@ def make_clusters(cloudlets, old_clusters, MC):
 #---------------------
 
 def load_cloudlets(t, MC):
-    cloudlets = cPickle.load(open('pkl/cloudlets_%08g.pkl' % t,'rb'))
+    items = ['core', 'condensed', 'plume', 'u_condensed', 'v_condensed', \
+        'w_condensed', 'u_plume', 'v_plume', 'w_plume']
 
-    result = []
-    n = 0
-    for cloudlet in cloudlets:
-        if ((len(cloudlet['plume']) > 7) 
-            or (len(cloudlet['condensed']) > 1)
-            or (len(cloudlet['core']) > 0)):
-            result.append( Cloudlet( n, t, cloudlet, MC ) )
-            n = n + 1
+    with h5py.File('hdf5/cloudlets_%08g.h5' % t, 'r') as cloudlets:
+        cloudlet = {}
+        result = []
+        n = 0
+
+        # TODO: Parallelize 
+        for i in cloudlets:
+            if ((len(cloudlets[i]['plume']) > 7) 
+                or (len(cloudlets[i]['condensed']) > 1)
+                or (len(cloudlets[i]['core']) > 0)):
+
+                # NOTE: The following loop takes a long time
+                for var in items:
+                    cloudlet[var] = cloudlets[i][var][...]
+                result.append( Cloudlet( n, t, cloudlet, MC ) )
+                n = n + 1
 
     return result
 
 def save_clusters(clusters, t):
     new_clusters = {}
-    for id, clust in clusters.iteritems():
-        new_dict = {}
-        new_dict['past_connections'] = clust.past_connections
-        new_dict['merge_connections'] = clust.merge_connections
-        new_dict['split_connections'] = clust.split_connections
-        new_dict['events'] = clust.events
-        new_dict['core'] = clust.core_mask()
-        new_dict['condensed'] = clust.condensed_mask()
-        new_dict['plume'] = clust.plume_mask()
-        new_clusters[id] = new_dict
-    cPickle.dump(new_clusters, open('pkl/clusters_%08g.pkl' % t, 'wb'))
-    cPickle.dump(clusters, open('pkl/cluster_objects_%08g.pkl' % t, 'wb'))
 
+    with h5py.File('hdf5/clusters_%08g.h5' % t, "w") as f:
+        # TODO: Parallelize 
+        for id, clust in clusters.iteritems():
+            grp = f.create_group(str(id)) 
+
+            dset = grp.create_dataset('past_connections', data=numpy.array(list(clust.past_connections)))
+            dset = grp.create_dataset('merge_connections', data=numpy.array(list(clust.merge_connections)))
+            dset = grp.create_dataset('split_connections', data=numpy.array(list(clust.split_connections)))
+            dset = grp.create_dataset('events', data=numpy.array(list(clust.events)))
+            dset = grp.create_dataset('core', data=clust.core_mask())
+            dset = grp.create_dataset('condensed', data=clust.condensed_mask())
+            dset = grp.create_dataset('plume', data=clust.plume_mask())
+    # NOTE: Ignore cluster_objects
+    #cPickle.dump(clusters, open('pkl/cluster_objects_%08g.pkl' % t, 'wb'))
+
+@profile
 def cluster_cloudlets(MC):
 
     print "cluster cloudlets; time step: 0"
@@ -369,6 +383,7 @@ def cluster_cloudlets(MC):
         print "\t%d clusters" % len(new_clusters)
 
         save_clusters(new_clusters, t)
+        gc.collect()
 
     
 if __name__ == "__main__":

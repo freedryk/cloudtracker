@@ -16,7 +16,7 @@ pkl files are saved in pkl/ subdirectory indexed by time
 """
 
 import numpy
-import cPickle
+
 from utility_functions import index_to_zyx, expand_indexes
 
 #-------------------
@@ -61,7 +61,7 @@ def expand_current_cloudlets(key, cloudlets, mask, MC):
         # Go through the current list of cloudlets
         for n in cloudlet_expand_indexes:
             expanded_points, mask = expand_cloudlet(cloudlet_points[n][-1], 
-                                                    mask, 
+                                                    mask,  
                                                     MC)
 
             if len(expanded_points) > 0:
@@ -141,6 +141,7 @@ def find_mean_cloudlet_velocity(cloudlets,
 
 #----------------------------
 
+@profile
 def generate_cloudlets(core, condensed, plume, u, v, w, MC): 
     # find the indexes of all the core and plume points
     core = core.flatten()
