@@ -155,7 +155,7 @@ def output_cloud_data(cloud_graphs, cloud_noise, t, MC):
 
             # Calculate core/cloud, env, shell and edge
             clouds[id] = calculate_data(cloud, MC)
-        id = id + 1
+        id += 1
 
     # Add all the noise to a noise cluster
     noise_clust = {'core': [], 'condensed': [], 'plume': []}

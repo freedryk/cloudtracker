@@ -141,7 +141,6 @@ def find_mean_cloudlet_velocity(cloudlets,
 
 #----------------------------
 
-@profile
 def generate_cloudlets(core, condensed, plume, u, v, w, MC): 
     # find the indexes of all the core and plume points
     core = core.flatten()

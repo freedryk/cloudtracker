@@ -332,7 +332,7 @@ def load_cloudlets(t, MC):
                 or (len(cloudlets[i]['condensed']) > 1)
                 or (len(cloudlets[i]['core']) > 0)):
 
-                # NOTE: The following loop takes a long time
+                # FIXME: The following loop takes a long time
                 for var in items:
                     cloudlet[var] = cloudlets[i][var][...]
                 result.append( Cloudlet( n, t, cloudlet, MC ) )
