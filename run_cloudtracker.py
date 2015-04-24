@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import glob, os, sys
 sys.path.append(os.getcwd() + '/lib/')
 sys.path.append(os.getcwd() + '/cloudtracker/')
@@ -8,7 +10,7 @@ from multiprocessing import Pool
 PROC = 1
 
 import model_param as mc
-import cloudtracker.main
+from . import cloudtracker.main
 
 # Default working directory for ent_analysis package
 cwd = os.getcwd()
@@ -40,5 +42,5 @@ def run_cloudtracker():
 if __name__ == '__main__':
 	run_cloudtracker()
 	
-	print 'Entrainment analysis completed'
+	print('Entrainment analysis completed')
 	

@@ -28,7 +28,7 @@ sam_directory = model_config['sam_directory']
 nt = len(glob.glob('%s/%s_[!A-Z]*.bin3D' % (input_directory, case_name)))
 
 def get_stat():
-	filename = glob.iglob(data_directory + '/*_stat.nc').next()
+	filename = next(glob.iglob(data_directory + '/*_stat.nc'))
 	return filename
 
 def time_picker(file_name):
