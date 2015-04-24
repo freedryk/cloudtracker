@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
 from pylab import *
 import matplotlib as mpl
 import sys
-import thermo
+from . import thermo
 import scipy.optimize.zeros as scizeros
 
 def make_skewT(tmin, tmax, pmax, pmin, skew=30.):

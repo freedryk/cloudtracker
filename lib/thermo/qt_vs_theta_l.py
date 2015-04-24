@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
 from pylab import *
 
 import numpy
 import sys
-import thermo
-import rootfinder
+from . import thermo
+from . import rootfinder
     
 def Tfind(Tguess, p, theta_l, rt):
     # due to the check in invert_theta_l, we can assume that r = r_star.

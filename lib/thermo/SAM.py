@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 import numpy
 
 # Definition of thermodynamic constant:
@@ -297,12 +298,12 @@ def dtqsati(T, p):
     return 0.622*dtesati(T)/p
     
 def main():
-    print find_chi(numpy.array([290., 290.]),
+    print(find_chi(numpy.array([290., 290.]),
                    numpy.array([289., 289.]),
                    qsatw(numpy.array([290., 290.]), numpy.array([1e5,1e5])),
                    numpy.array([.008,.008]),
                    numpy.array([.001,.001]),
-                   numpy.array([1e5, 1e5]))
+                   numpy.array([1e5, 1e5])))
 
 if __name__ == '__main__':
     main()

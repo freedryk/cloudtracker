@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 import numpy
 
 def find_interval(f, x, *args):
@@ -120,7 +121,7 @@ def fzero(f, x, *args, **parms):
         x3 = x2
         y3 = y2
     # end of bisection loop. If we get here, we did not converge.
-    print "Iterate: Failed to converge in imax tries."
+    print("Iterate: Failed to converge in imax tries.")
     return x2
     
 def testfunc(x):
@@ -130,5 +131,5 @@ def testfunc(x):
 if __name__=="__main__":
     f = testfunc
     x = 1.
-    print fzero(f, x)
-    print fzero(f, x, eps=1e-300, maxiter = 80.)
+    print(fzero(f, x))
+    print(fzero(f, x, eps=1e-300, maxiter = 80.))

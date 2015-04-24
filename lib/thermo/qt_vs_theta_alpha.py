@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
 import numpy
 from pylab import subplot
 import sys
-import thermo
+from . import thermo
     
 def plot_rt_vs_theta_alpha(p, T, r, rl, alpha):
     theta_l = thermo.theta_l(p, T, r, rl)

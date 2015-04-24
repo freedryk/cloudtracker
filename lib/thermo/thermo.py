@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
 import numpy
-import rootfinder
+from . import rootfinder
 
 # Definition of thermodynamic constant:
 Cpd = 1005.7  # Heat capacity at constant pressure for dry air [J kg^-1 K^-1]
