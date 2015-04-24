@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # Runtime (690, 130, 128, 128): 1.5 hours
 
+from __future__ import print_function
+from __future__ import absolute_import
 import numpy
 import h5py
 import gc
 
-from cloud_objects import Cloudlet, Cluster
-from utility_functions import index_to_zyx, zyx_to_index
+from .cloud_objects import Cloudlet, Cluster
+from .utility_functions import index_to_zyx, zyx_to_index
 
 saveit = True
 
@@ -183,7 +185,7 @@ def create_new_clusters(cloudlets, clusters, max_id, MC):
         cloudlet = condensed_list.pop()
         cluster = Cluster(max_id, [cloudlet], MC)
         cluster.events.append('NCLD')
-        if (len(cluster.adjacent_cloudlets('condensed')) > 0): print "        condensed connection ERROR"
+        if (len(cluster.adjacent_cloudlets('condensed')) > 0): print("        condensed connection ERROR")
 
     # Make clusters out of the cloudlets without core points
     while plume_list:
@@ -361,15 +363,15 @@ def save_clusters(clusters, t):
 @profile
 def cluster_cloudlets(MC):
 
-    print "cluster cloudlets; time step: 0"
+    print("cluster cloudlets; time step: 0")
     cloudlets = load_cloudlets(0, MC)    
     make_spatial_cloudlet_connections( cloudlets, MC )
     new_clusters = create_new_clusters(cloudlets, {}, 0, MC)
-    print "\t%d clusters" % len(new_clusters)
+    print("\t%d clusters" % len(new_clusters))
     save_clusters(new_clusters, 0)
         
     for t in range(1, MC['nt']):
-        print "cluster cloudlets; time step: %d" % t
+        print("cluster cloudlets; time step: %d" % t)
         old_clusters = new_clusters
         cloudlets = load_cloudlets(t, MC)
 
@@ -380,7 +382,7 @@ def cluster_cloudlets(MC):
         # Uses the previous timestep overlap info to group
         # current cloudlets into clusters.
         new_clusters = make_clusters(cloudlets, old_clusters, MC)
-        print "\t%d clusters" % len(new_clusters)
+        print("\t%d clusters" % len(new_clusters))
 
         save_clusters(new_clusters, t)
         gc.collect()

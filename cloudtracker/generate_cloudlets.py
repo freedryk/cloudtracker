@@ -14,10 +14,12 @@ The dictionaries have the structure:
 'w_plume': }
 pkl files are saved in pkl/ subdirectory indexed by time
 """
+from __future__ import print_function
+from __future__ import absolute_import
 
 import numpy
 
-from utility_functions import index_to_zyx, expand_indexes
+from .utility_functions import index_to_zyx, expand_indexes
 
 #-------------------
 
@@ -157,7 +159,7 @@ def generate_cloudlets(core, condensed, plume, u, v, w, MC):
         cloudlet['condensed'] = cloudlet['core'][:]
             
     ncore = len(cloudlets)
-    print "\t%d core cloudlets" % ncore
+    print("\t%d core cloudlets" % ncore)
 
     cloudlets, condensed = expand_current_cloudlets('condensed', 
                                                     cloudlets,
@@ -176,7 +178,7 @@ def generate_cloudlets(core, condensed, plume, u, v, w, MC):
         cloudlet['plume'] = cloudlet['condensed'][:]
 
     ncondensed = len(cloudlets)
-    print "\t%d condensed cloudlets" % (ncondensed-ncore)
+    print("\t%d condensed cloudlets" % (ncondensed-ncore))
 
 
     cloudlets, plume = expand_current_cloudlets('plume', 
@@ -195,7 +197,7 @@ def generate_cloudlets(core, condensed, plume, u, v, w, MC):
 
     nplume = len(cloudlets)
     
-    print "\t%d plume cloudlets" % (nplume-ncondensed)
+    print("\t%d plume cloudlets" % (nplume-ncondensed))
 
     cloudlets = find_mean_cloudlet_velocity(cloudlets, 
                                             u, v, w,

@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # Runtime (690, 130, 128, 128): 1 hour 20 minutes
 
+from __future__ import print_function
+from __future__ import absolute_import
 import pickle
 import h5py
 import networkx
 import numpy
-from utility_functions import zyx_to_index, index_to_zyx, calc_radii, \
+from .utility_functions import zyx_to_index, index_to_zyx, calc_radii, \
     expand_indexes
 import sys, gc
 #import scipy.io
@@ -116,7 +118,7 @@ def save_text_file(clouds, t, MC):
 @profile
 def output_cloud_data(cloud_graphs, cloud_noise, t, MC):
 
-    print 'Timestep:', t
+    print('Timestep:', t)
 
     # Load the cluster zyx data for the current time
     clusters = {}
@@ -178,7 +180,7 @@ def output_cloud_data(cloud_graphs, cloud_noise, t, MC):
     # Only save the noise if it contains cloud core
     clouds[-1] = calculate_data(noise_clust, MC)
             
-    print "Number of Clouds at Current Timestep: ", len(clouds.keys())
+    print("Number of Clouds at Current Timestep: ", len(clouds.keys()))
 
     items = ['core', 'condensed', 'plume', 'core_shell', 'condensed_shell', \
         'core_edge', 'condensed_edge', 'core_env', 'condensed_env']
