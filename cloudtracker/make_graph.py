@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 #Runtime (690,130,128,128): ?
 
-import cPickle
+import cPickle as pickle
+import h5py
+import os, sys, gc
 import networkx
 
 full_output=False
 
 def full_output(cloud_times, cloud_graphs, merges, splits, MC):
     cloud_times = tuple(cloud_times)
-    cPickle.dump(cloud_times, open('pkl/cloud_times.pkl','wb'))
+
+    pickle.dump(cloud_times, open('pkl/cloud_times.pkl','wb'))
 
     n = 0
     clouds = {}
@@ -41,8 +44,8 @@ def full_output(cloud_times, cloud_graphs, merges, splits, MC):
 
         clouds[n] = events
         n = n + 1
-
-    cPickle.dump(clouds, open('pkl/graph_events.pkl', 'wb'))
+        
+    pickle.dump(clouds, open('pkl/graph_events.pkl', 'wb'))
 
     
 
@@ -56,38 +59,37 @@ def make_graph(MC):
     splits = {}
 
     for t in range(MC['nt']):
-
-        clusters = cPickle.load(open('pkl/clusters_%08g.pkl' % t, 'rb'))
-
-        for id in clusters:
-            # Make dictionaries of every split and every merge event that occurs
-            # in a cluster's lifecycle
-            m_conns = clusters[id]['merge_connections']
-            s_conns = clusters[id]['split_connections']
-            core = len(clusters[id]['core'])
-            condensed = len(clusters[id]['condensed'])
-            plume = len(clusters[id]['plume'])
-            attr_dict = {'merge': m_conns,
-                         'split': s_conns,
-                         'core': core,
-                         'condensed': condensed,
-                         'plume': plume}
-                         
-            for item in m_conns:
-                node1 = '%08g|%08g' % (t, id)
-                node2 = '%08g|%08g' % (t-1, item)
-                merges[node2] = node1
-            for item in s_conns:
-                node1 = '%08g|%08g' % (t, id)
-                node2 = '%08g|%08g' % (t, item)
-                splits[node2] = node1            
-        
-            # Construct a graph of the cloudlet connections
-            graph.add_node('%08g|%08g' % (t, id), attr_dict = attr_dict)
-            if clusters[id]['past_connections']:
-                for item in clusters[id]['past_connections']:
-                    graph.add_edge('%08g|%08g' % (t-1, item),
-                                   '%08g|%08g' % (t, id))
+        with h5py.File('hdf5/clusters_%08g.h5' % t, 'r') as clusters:
+            for id in clusters:
+                # Make dictionaries of every split and every merge event that occurs
+                # in a cluster's lifecycle
+                m_conns = list(clusters[id]['merge_connections'][...])
+                s_conns = list(clusters[id]['split_connections'][...])
+                core = len(clusters[id]['core'][...])
+                condensed = len(clusters[id]['condensed'][...])
+                plume = len(clusters[id]['plume'][...])
+                attr_dict = {'merge': m_conns,
+                             'split': s_conns,
+                             'core': core,
+                             'condensed': condensed,
+                             'plume': plume}
+                             
+                for item in m_conns:
+                    node1 = '%08g|%08g' % (t, int(id))
+                    node2 = '%08g|%08g' % (t-1, item)
+                    merges[node2] = node1
+                for item in s_conns:
+                    node1 = '%08g|%08g' % (t, int(id))
+                    node2 = '%08g|%08g' % (t, item)
+                    splits[node2] = node1            
+            
+                # Construct a graph of the cloudlet connections
+                graph.add_node('%08g|%08g' % (t, int(id)), attr_dict = attr_dict)
+                if clusters[id]['past_connections'][...]:
+                    for item in clusters[id]['past_connections'][...]:
+                        graph.add_edge('%08g|%08g' % (t-1, item),
+                                       '%08g|%08g' % (t, int(id)))
+        gc.collect()
 
     # Iterate over every cloud in the graph
     for subgraph in networkx.connected_component_subgraphs(graph):
@@ -103,7 +105,7 @@ def make_graph(MC):
             for node in subgraph:
                 if subgraph.node[node]['split']:
                     item = subgraph.node[node]['split'].pop()
-                    t = int(node[:8])
+                    t = int(node[:8]) 
                     graph.add_edge(node, '%08g|%08g' % (t, item))
 
     for subgraph in networkx.connected_component_subgraphs(graph):

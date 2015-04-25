@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
 import numpy
-from utility_functions import expand_indexes, \
+from .utility_functions import expand_indexes, \
         index_to_zyx, find_halo, calc_distance
 
 def calc_com(mask, MC):
@@ -22,17 +23,17 @@ def calc_com(mask, MC):
     if numpy.var(y2 - y2m) > numpy.var(y1 - y1m):
         y = y1m
     else:
-	y = (y2m + .5)%ny - .5
+        y = (y2m + .5)%ny - .5
 
     if numpy.var(y2 - y2m) > numpy.var(y1 - y1m):
         y = y1m
     else:
-	y = (y2m + .5)%ny - .5
+        y = (y2m + .5)%ny - .5
 
     if numpy.var(x2 - x2m) > numpy.var(x1 - x1m):
         x = x1m
     else:
-	x = (x2m + .5)%nx - .5
+        x = (x2m + .5)%nx - .5
 
     return numpy.array(([z], [y], [x]))
 
@@ -132,7 +133,7 @@ class Cluster:
             cloudlet.cluster = self
             self.cloudlets.add(cloudlet)
         else:
-            raise "Cloudlet already belongs to a cluster!"
+            raise Exception("Cloudlet already belongs to a cluster!")
 
     def add_cloudlets(self, cloudlets):
         for cloudlet in cloudlets:
@@ -144,7 +145,7 @@ class Cluster:
                 cloudlet.cluster = None
                 self.cloudlets.remove( cloudlet )
             else:
-                raise "Cloudlet does not belong to cluster!"
+                raise Exception("Cloudlet does not belong to cluster!")
 
     def has_core(self):
         for cloudlet in self.cloudlets:
